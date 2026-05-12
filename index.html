@@ -171,8 +171,7 @@
                 <label>Mercado</label>
                 <div class="market-group">
                     <select id="marketSelect">
-                        <option>Assaí</option><option>MaM</option><option>MEGA</option>
-                        <option>CEASA</option><option>Guanabara</option><option>Sacolão</option>
+                        <!-- Mercados carregados via JS -->
                     </select>
                     <button class="btn-add-market" onclick="addNewMarket()">+</button>
                 </div>
@@ -214,22 +213,52 @@
     </div>
 
     <script>
-        const GAS_API = "https://script.google.com/macros/s/AKfycbyfNrJ-jRh4UoiaJnHx8S9snB1pq7xfKaEuEaa1GpUj266yxjmmIvpQ3yvpp6NKuS5azA/exec";
+        const GAS_API = "https://script.google.com/macros/s/AKfycbyG1h9qqJfD_gxVKUQq7xM_LHRaJVPgLTcXGQKxi5FVVRJxn1-JgdVIwyvlOKnbN24L4w/exec";
         let html5QrCode;
+
+        // Lista padrão de mercados
+        const DEFAULT_MARKETS = ["Assaí", "MaM", "MEGA", "CEASA", "Guanabara", "Sacolão"];
+
+        // Carrega mercados ao iniciar
+        document.addEventListener('DOMContentLoaded', renderMarkets);
+
+        function renderMarkets() {
+            const sel = document.getElementById('marketSelect');
+            const savedMarkets = JSON.parse(localStorage.getItem('kf_markets')) || DEFAULT_MARKETS;
+            
+            sel.innerHTML = '';
+            savedMarkets.forEach(m => {
+                const opt = document.createElement('option');
+                opt.text = m;
+                opt.value = m;
+                sel.add(opt);
+            });
+        }
 
         function addNewMarket() {
             Swal.fire({
                 title: 'Novo Mercado',
                 input: 'text',
+                inputPlaceholder: 'Nome do mercado',
                 confirmButtonColor: '#D4AF37',
-                confirmButtonText: 'Adicionar'
+                confirmButtonText: 'Adicionar',
+                showCancelButton: true,
+                cancelButtonText: 'Cancelar'
             }).then((result) => {
                 if (result.value) {
-                    const sel = document.getElementById('marketSelect');
-                    const opt = document.createElement('option');
-                    opt.text = result.value;
-                    opt.selected = true;
-                    sel.add(opt);
+                    const newMarket = result.value.trim();
+                    if (newMarket) {
+                        let savedMarkets = JSON.parse(localStorage.getItem('kf_markets')) || DEFAULT_MARKETS;
+                        if (!savedMarkets.includes(newMarket)) {
+                            savedMarkets.push(newMarket);
+                            localStorage.setItem('kf_markets', JSON.stringify(savedMarkets));
+                            renderMarkets();
+                            document.getElementById('marketSelect').value = newMarket;
+                            Swal.fire('Sucesso', 'Mercado adicionado!', 'success');
+                        } else {
+                            Swal.fire('Aviso', 'Mercado já existe.', 'info');
+                        }
+                    }
                 }
             });
         }
@@ -295,30 +324,53 @@
         }
 
         async function saveData() {
+            const nome = document.getElementById('editNome').value.trim();
+            const valorRaw = document.getElementById('editValor').value.trim();
+            const qtd = document.getElementById('editQtd').value;
+            const mercado = document.getElementById('marketSelect').value;
+            const destino = document.getElementById('editDestino').value;
+
+            if(!nome || !valorRaw) {
+                return Swal.fire('Atenção', 'Nome e Valor são obrigatórios', 'warning');
+            }
+
             const data = {
                 data: new Date().toLocaleDateString('pt-BR'),
-                nome: document.getElementById('editNome').value,
-                qtd: document.getElementById('editQtd').value,
-                valor: document.getElementById('editValor').value,
-                mercado: document.getElementById('marketSelect').value,
-                destino: document.getElementById('editDestino').value
+                nome: nome,
+                qtd: qtd,
+                valor: valorRaw,
+                mercado: mercado,
+                destino: destino
             };
 
-            if(!data.nome || !data.valor) return Swal.fire('Atenção', 'Nome e Valor são obrigatórios', 'warning');
-
-            Swal.fire({ title: 'Salvando...', didOpen: () => Swal.showLoading() });
+            Swal.fire({ 
+                title: 'Enviando...', 
+                text: 'Sincronizando com a planilha',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading() 
+            });
 
             try {
-                // Usamos no-cors para evitar erros de redirecionamento do Google
+                // Usamos POST com mode no-cors para evitar problemas de pré-venda (preflight)
                 await fetch(GAS_API, { 
                     method: 'POST', 
                     mode: 'no-cors',
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data) 
                 });
                 
-                Swal.fire('Sucesso!', 'Item enviado para a planilha.', 'success').then(() => location.reload());
+                // Como no-cors não permite ler a resposta, assumimos sucesso se o fetch não der erro de rede
+                Swal.fire({
+                    title: 'Sucesso!',
+                    text: 'Dados enviados para a planilha.',
+                    icon: 'success',
+                    confirmButtonColor: '#D4AF37'
+                }).then(() => location.reload());
+
             } catch (e) {
-                Swal.fire('Erro', 'Falha ao salvar. Verifique a internet.', 'error');
+                console.error('Erro no salvamento:', e);
+                Swal.fire('Erro', 'Falha ao conectar com o servidor. Verifique sua internet.', 'error');
             }
         }
     </script>
