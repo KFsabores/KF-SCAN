@@ -2,147 +2,283 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KF-SCAN | Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KF-SCAN | Dashboard Premium</title>
+    
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    
     <style>
-        :root { --gold: #D4AF37; --black: #0f0f0f; --card: #1e1e1e; }
-        body { background: var(--black); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
-        
-        .app-container { max-width: 500px; margin: 0 auto; padding: 20px; }
-        
-        .header { text-align: center; padding: 40px 0; }
-        .logo-seal {
-            width: 120px; height: 120px; border: 4px solid var(--gold);
-            border-radius: 50%; margin: 0 auto 15px;
-            display: flex; align-items: center; justify-content: center;
-            background: linear-gradient(145deg, #1a1a1a, #000);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5), 0 0 15px rgba(212,175,55,0.2);
-            font-size: 1.2rem; font-weight: 900; color: var(--gold); letter-spacing: 1px;
+        :root {
+            --gold: #D4AF37;
+            --gold-light: #F2D472;
+            --black: #000000;
+            --card-bg: #121212;
+            --text-gray: #a0a0a0;
+        }
+
+        body {
+            background-color: var(--black);
+            color: white;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* Layout Combinado com o Logo Selo */
+        .header {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(to bottom, #1a1a1a, var(--black));
+        }
+
+        .logo-container {
+            width: 130px;
+            height: 130px;
+            margin: 0 auto 15px;
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+            padding: 5px;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+            background: var(--black);
+        }
+
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 450px;
+            margin: 0 auto;
         }
 
         .card {
-            background: var(--card); border-radius: 20px; padding: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); margin-bottom: 20px;
-            border: 1px solid #333;
+            background: var(--card-bg);
+            border: 1px solid #222;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        label { color: var(--gold); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; }
+        /* Tipografia e Inputs */
+        h2 { color: var(--gold); font-size: 1.2rem; margin-top: 0; text-transform: uppercase; letter-spacing: 1px; }
+        label { color: var(--gold); font-size: 0.75rem; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 5px; }
         
         select, input {
-            width: 100%; background: #252525; border: 1px solid #444;
-            color: #fff; padding: 15px; border-radius: 12px; margin-bottom: 15px; font-size: 1rem;
+            width: 100%;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            box-sizing: border-box;
         }
 
-        button {
-            width: 100%; padding: 18px; border-radius: 15px; border: none;
-            font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.3s;
+        /* Botões Estilo KF-SCAN */
+        .btn-main {
+            background: linear-gradient(45deg, var(--gold), var(--gold-light));
+            color: #000;
+            border: none;
+            padding: 18px;
+            border-radius: 15px;
+            font-weight: 800;
             text-transform: uppercase;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+            margin-bottom: 10px;
         }
 
-        .btn-gold { background: linear-gradient(45deg, #D4AF37, #F2D472); color: #000; box-shadow: 0 5px 15px rgba(212,175,55,0.3); }
-        .btn-outline { background: transparent; border: 1px solid var(--gold); color: var(--gold); margin-top: 10px; }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 15px;
+            border-radius: 15px;
+            font-weight: bold;
+            width: 100%;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
 
-        #reader { width: 100%; border-radius: 15px; overflow: hidden; border: 2px solid var(--gold); display: none; }
-        
+        /* Scanner Area */
+        #reader {
+            width: 100%;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid var(--gold);
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            border-top: 3px solid var(--gold);
+        }
+
+        .stat-val { font-size: 1.1rem; font-weight: bold; color: white; }
+        .stat-label { font-size: 0.6rem; color: var(--gold); }
+
         .hidden { display: none; }
     </style>
 </head>
 <body>
 
-<div class="app-container">
     <div class="header">
-        <div class="logo-seal">KF-SCAN</div>
-        <p style="color: #888; font-size: 0.9rem;">Gestão de Suprimentos Premium</p>
-    </div>
-
-    <div id="setup-screen">
-        <div class="card">
-            <label>Mercado</label>
-            <select id="marketSelect">
-                <option>Assaí</option><option>MaM</option><option>MEGA</option>
-                <option>CEASA</option><option>Guanabara</option><option>Sacolão</option>
-            </select>
-            <input type="text" id="newMarket" placeholder="Outro mercado...">
-            <button class="btn-gold" onclick="startScanner()" style="margin-top: 10px;">📸 Escanear QR Code</button>
-            <button class="btn-outline" onclick="showForm('Manual')">✍️ Lançamento Manual</button>
+        <div class="logo-container">
+            <img src="kfscan.jpg" alt="KF-SCAN Logo">
         </div>
-        <div id="reader"></div>
+        <div id="userEmail" style="font-size: 0.7rem; color: var(--text-gray);">Painel de Controle</div>
     </div>
 
-    <div id="form-screen" class="hidden">
-        <div class="card">
-            <h2 id="formTitle" style="margin-top:0; font-size: 1.2rem; color: var(--gold);">Revisar Item</h2>
-            
-            <label>Item</label>
-            <input type="text" id="editNome">
-            
-            <div style="display: flex; gap: 10px;">
-                <div style="flex: 1;"><label>Qtd</label><input type="number" id="editQtd" value="1"></div>
-                <div style="flex: 2;"><label>Valor R$</label><input type="text" id="editValor"></div>
+    <div class="container">
+        <div id="menu-screen">
+            <div class="card">
+                <label>Mercado Selecionado</label>
+                <select id="marketSelect">
+                    <option>Assaí</option><option>MaM</option><option>MEGA</option>
+                    <option>CEASA</option><option>Guanabara</option><option>Sacolão</option>
+                </select>
+                
+                <button class="btn-main" onclick="startScanner()">📸 ESCANEAR QR CODE</button>
+                <button class="btn-outline" onclick="showForm('Manual')">✍️ LANÇAMENTO MANUAL</button>
             </div>
 
-            <label>Destino</label>
-            <select id="editDestino">
-                <option value="LOJA">LOJA (KF Sabores)</option>
-                <option value="CASA">CASA (Pessoal)</option>
-            </select>
+            <div id="reader"></div>
 
-            <button class="btn-gold" onclick="sendData()">✓ Salvar na Planilha</button>
-            <button class="btn-outline" onclick="location.reload()">↺ Voltar</button>
+            <div class="card">
+                <h2>Relatórios & Gestão</h2>
+                <button class="btn-outline" onclick="openQuery()">📊 CONSULTA POR PERÍODO</button>
+                <button class="btn-outline" onclick="openSheet()" style="border-color: #217346; color: #217346;">📂 ABRIR PLANILHA</button>
+            </div>
+        </div>
+
+        <div id="form-screen" class="hidden">
+            <div class="card">
+                <h2 id="formTitle">Novo Item</h2>
+                <label>Descrição do Item</label>
+                <input type="text" id="editNome" placeholder="Ex: Queijo Muçarela">
+                
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1;"><label>Qtd</label><input type="number" id="editQtd" value="1"></div>
+                    <div style="flex: 2;"><label>Preço Unit.</label><input type="text" id="editValor" placeholder="0,00"></div>
+                </div>
+
+                <label>Destino da Verba</label>
+                <select id="editDestino" style="border: 2px solid var(--gold);">
+                    <option value="LOJA">LOJA (KF Sabores)</option>
+                    <option value="CASA">CASA (Pessoal)</option>
+                </select>
+
+                <button class="btn-main" onclick="saveData()">CONFIRMAR REGISTRO</button>
+                <button class="btn-outline" onclick="cancelAction()">CANCELAR</button>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    const GAS_URL = "SUA_NOVA_URL_DO_APPS_SCRIPT_AQUI"; // COLOQUE A URL AQUI
-    let scanner;
+    <script>
+        const GAS_API = "https://script.google.com/macros/s/AKfycbygtMvDktXtSE43weV9QsVUK1fplK_nCkVq8wunMs2PNt7ZdRYA7t1K-KPs8JosgSSGVw/exec"; // <--- COLOQUE AQUI
+        const SPREADSHEET_URL = "https://docs.google.com/spreadsheets/d/1RJZ8Kloo62yg7YDur1G2KG2w5xYCHjbk_WCRbinewUY/edit?gid=0#gid=0"; // <--- COLOQUE AQUI
+        let html5QrCode;
 
-    function startScanner() {
-        document.getElementById('reader').style.display = 'block';
-        scanner = new Html5Qrcode("reader");
-        scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, 
-            (decodedText) => {
-                scanner.stop();
-                document.getElementById('reader').style.display = 'none';
-                // Para NFC-e, o ideal é tratar a URL, mas aqui vamos simular a abertura
-                Swal.fire('Lido!', 'Chave detectada. Preencha os detalhes.', 'success');
-                showForm('QR Code');
-            }
-        );
-    }
-
-    function showForm(type) {
-        document.getElementById('setup-screen').classList.add('hidden');
-        document.getElementById('form-screen').classList.remove('hidden');
-        document.getElementById('formTitle').innerText = "Lançamento " + type;
-    }
-
-    async function sendData() {
-        const payload = {
-            data: new Date().toLocaleDateString('pt-BR'),
-            nome: document.getElementById('editNome').value,
-            qtd: document.getElementById('editQtd').value,
-            valor: document.getElementById('editValor').value,
-            mercado: document.getElementById('marketSelect').value,
-            destino: document.getElementById('editDestino').value,
-            sessao: "Geral"
-        };
-
-        Swal.fire({ title: 'Salvando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-        try {
-            await fetch(GAS_URL, {
-                method: 'POST',
-                mode: 'no-cors', // Necessário para evitar erros de política do Google
-                body: JSON.stringify(payload)
+        // Configuração de Calendário (Consulta por Período)
+        function openQuery() {
+            Swal.fire({
+                title: 'Selecione o Período',
+                html: '<input type="text" id="rangeDate" class="swal2-input" style="width: 80%">',
+                didOpen: () => {
+                    flatpickr("#rangeDate", { mode: "range", dateFormat: "d/m/Y", locale: "pt" });
+                },
+                confirmButtonText: 'Consultar',
+                confirmButtonColor: '#D4AF37',
+                preConfirm: () => { return document.getElementById('rangeDate').value; }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    showMockResults(result.value);
+                }
             });
-            Swal.fire('Sucesso!', 'Item gravado na KF-SCAN_Dados_Fiscais', 'success').then(() => location.reload());
-        } catch (e) {
-            Swal.fire('Erro', 'Não foi possível salvar.', 'error');
         }
-    }
-</script>
+
+        function showMockResults(periodo) {
+            Swal.fire({
+                title: 'Resultados: ' + periodo,
+                html: `
+                    <div class="stats-grid">
+                        <div class="stat-box"><div class="stat-val">R$ 0,00</div><div class="stat-label">TOTAL LOJA</div></div>
+                        <div class="stat-box"><div class="stat-val">R$ 0,00</div><div class="stat-label">TOTAL CASA</div></div>
+                    </div>
+                    <p style="font-size: 0.8rem; margin-top: 15px;">*Os totais reais serão puxados da API em breve.</p>
+                `,
+                confirmButtonColor: '#D4AF37'
+            });
+        }
+
+        function startScanner() {
+            document.getElementById('reader').style.display = 'block';
+            html5QrCode = new Html5Qrcode("reader");
+            html5QrCode.start(
+                { facingMode: "environment" }, 
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                (decodedText) => {
+                    html5QrCode.stop();
+                    document.getElementById('reader').style.display = 'none';
+                    Swal.fire('QR Code Lido!', 'Preencha os detalhes do item.', 'success');
+                    showForm('Lançamento via QR');
+                }
+            );
+        }
+
+        function showForm(title) {
+            document.getElementById('menu-screen').classList.add('hidden');
+            document.getElementById('form-screen').classList.remove('hidden');
+            document.getElementById('formTitle').innerText = title;
+        }
+
+        async function saveData() {
+            const data = {
+                data: new Date().toLocaleDateString('pt-BR'),
+                nome: document.getElementById('editNome').value,
+                qtd: document.getElementById('editQtd').value,
+                valor: document.getElementById('editValor').value,
+                mercado: document.getElementById('marketSelect').value,
+                destino: document.getElementById('editDestino').value,
+                sessao: "Geral"
+            };
+
+            if(!data.nome || !data.valor) return Swal.fire('Erro', 'Nome e Valor são obrigatórios', 'error');
+
+            Swal.fire({ title: 'Gravando...', didOpen: () => Swal.showLoading() });
+
+            try {
+                await fetch(GAS_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
+                Swal.fire('Sucesso!', 'Item registrado na planilha.', 'success').then(() => location.reload());
+            } catch (e) {
+                Swal.fire('Erro', 'Falha ao conectar com o Google.', 'error');
+            }
+        }
+
+        function openSheet() { window.open(SPREADSHEET_URL, '_blank'); }
+        function cancelAction() { location.reload(); }
+    </script>
 </body>
 </html>
