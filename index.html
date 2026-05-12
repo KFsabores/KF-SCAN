@@ -28,7 +28,6 @@
             overflow-x: hidden;
         }
 
-        /* Layout Combinado com o Logo Selo */
         .header {
             text-align: center;
             padding: 30px 20px;
@@ -36,14 +35,14 @@
         }
 
         .logo-container {
-            width: 130px;
-            height: 130px;
+            width: 120px;
+            height: 120px;
             margin: 0 auto 15px;
             border-radius: 50%;
             border: 2px solid var(--gold);
             padding: 5px;
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
             background: var(--black);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
         }
 
         .logo-container img {
@@ -54,7 +53,7 @@
         }
 
         .container {
-            width: 90%;
+            width: 92%;
             max-width: 450px;
             margin: 0 auto;
         }
@@ -68,8 +67,7 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        /* Tipografia e Inputs */
-        h2 { color: var(--gold); font-size: 1.2rem; margin-top: 0; text-transform: uppercase; letter-spacing: 1px; }
+        h2 { color: var(--gold); font-size: 1.1rem; margin-top: 0; text-transform: uppercase; letter-spacing: 1px; }
         label { color: var(--gold); font-size: 0.75rem; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 5px; }
         
         select, input {
@@ -84,7 +82,24 @@
             box-sizing: border-box;
         }
 
-        /* Botões Estilo KF-SCAN */
+        .market-group {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .btn-add-market {
+            background: #1a1a1a;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+
         .btn-main {
             background: linear-gradient(45deg, var(--gold), var(--gold-light));
             color: #000;
@@ -95,7 +110,6 @@
             text-transform: uppercase;
             width: 100%;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
             margin-bottom: 10px;
         }
 
@@ -111,7 +125,6 @@
             margin-bottom: 10px;
         }
 
-        /* Scanner Area */
         #reader {
             width: 100%;
             border-radius: 15px;
@@ -129,15 +142,16 @@
         }
 
         .stat-box {
-            background: #1a1a1a;
+            background: #000;
             padding: 15px;
             border-radius: 12px;
             text-align: center;
+            border: 1px solid #222;
             border-top: 3px solid var(--gold);
         }
 
         .stat-val { font-size: 1.1rem; font-weight: bold; color: white; }
-        .stat-label { font-size: 0.6rem; color: var(--gold); }
+        .stat-label { font-size: 0.6rem; color: var(--gold); text-transform: uppercase; }
 
         .hidden { display: none; }
     </style>
@@ -146,90 +160,123 @@
 
     <div class="header">
         <div class="logo-container">
-            <img src="kfscan.jpg" alt="KF-SCAN Logo">
+            <img src="kfscan.jpg" alt="Logo KF-SCAN">
         </div>
-        <div id="userEmail" style="font-size: 0.7rem; color: var(--text-gray);">Painel de Controle</div>
+        <div style="font-size: 0.8rem; letter-spacing: 2px; color: var(--gold);">KF SABORES PREMIUM</div>
     </div>
 
     <div class="container">
         <div id="menu-screen">
             <div class="card">
-                <label>Mercado Selecionado</label>
-                <select id="marketSelect">
-                    <option>Assaí</option><option>MaM</option><option>MEGA</option>
-                    <option>CEASA</option><option>Guanabara</option><option>Sacolão</option>
-                </select>
+                <label>Onde você está comprando?</label>
+                <div class="market-group">
+                    <select id="marketSelect">
+                        <option>Assaí</option><option>MaM</option><option>MEGA</option>
+                        <option>CEASA</option><option>Guanabara</option><option>Sacolão</option>
+                    </select>
+                    <button class="btn-add-market" onclick="addNewMarket()" title="Adicionar Novo Mercado">+</button>
+                </div>
                 
                 <button class="btn-main" onclick="startScanner()">📸 ESCANEAR QR CODE</button>
-                <button class="btn-outline" onclick="showForm('Manual')">✍️ LANÇAMENTO MANUAL</button>
+                <button class="btn-outline" onclick="showForm('Lançamento Manual')">✍️ LANÇAMENTO MANUAL</button>
             </div>
 
             <div id="reader"></div>
 
             <div class="card">
                 <h2>Relatórios & Gestão</h2>
-                <button class="btn-outline" onclick="openQuery()">📊 CONSULTA POR PERÍODO</button>
-                <button class="btn-outline" onclick="openSheet()" style="border-color: #217346; color: #217346;">📂 ABRIR PLANILHA</button>
+                <button class="btn-outline" onclick="fetchAndQuery()">📊 CONSULTA POR PERÍODO</button>
+                <button class="btn-outline" onclick="window.open('https://docs.google.com/spreadsheets/d/1RJZ8Kloo62yg7YDur1G2KG2w5xYCHjbk_WCRbinewUY/edit', '_blank')" style="border-color: #217346; color: #217346;">📂 ABRIR PLANILHA</button>
             </div>
         </div>
 
         <div id="form-screen" class="hidden">
             <div class="card">
-                <h2 id="formTitle">Novo Item</h2>
-                <label>Descrição do Item</label>
-                <input type="text" id="editNome" placeholder="Ex: Queijo Muçarela">
+                <h2 id="formTitle">Novo Registro</h2>
+                <label>Descrição do Produto</label>
+                <input type="text" id="editNome" placeholder="Ex: Farinha de Trigo">
                 
                 <div style="display: flex; gap: 10px;">
                     <div style="flex: 1;"><label>Qtd</label><input type="number" id="editQtd" value="1"></div>
                     <div style="flex: 2;"><label>Preço Unit.</label><input type="text" id="editValor" placeholder="0,00"></div>
                 </div>
 
-                <label>Destino da Verba</label>
+                <label>Destino do Gasto</label>
                 <select id="editDestino" style="border: 2px solid var(--gold);">
                     <option value="LOJA">LOJA (KF Sabores)</option>
                     <option value="CASA">CASA (Pessoal)</option>
                 </select>
 
-                <button class="btn-main" onclick="saveData()">CONFIRMAR REGISTRO</button>
-                <button class="btn-outline" onclick="cancelAction()">CANCELAR</button>
+                <button class="btn-main" onclick="saveData()">CONFIRMAR E SALVAR</button>
+                <button class="btn-outline" onclick="location.reload()">CANCELAR</button>
             </div>
         </div>
     </div>
 
     <script>
-        const GAS_API = "https://script.google.com/macros/s/AKfycbyIr3lrLgEP5gjPgwDo3h9-K2BN7lGyE3ha9vs6iSNJrzgSrNPu2Ln99iQ8me1egOrBDw/exec"; // <--- COLOQUE AQUI
-        const SPREADSHEET_URL = "https://docs.google.com/spreadsheets/d/1RJZ8Kloo62yg7YDur1G2KG2w5xYCHjbk_WCRbinewUY/edit?gid=0#gid=0"; // <--- COLOQUE AQUI
+        const GAS_API = "https://script.google.com/macros/s/AKfycbxjU3c6lbY2iMHi_UPT3EUx8tYR-hZeJ3WU0MHFgylBJ6JDDaQo_mmqR3g1shZKxcXPOQ/exec";
         let html5QrCode;
 
-        // Configuração de Calendário (Consulta por Período)
-        function openQuery() {
+        function addNewMarket() {
+            Swal.fire({
+                title: 'Novo Mercado',
+                input: 'text',
+                inputLabel: 'Nome do Estabelecimento',
+                showCancelButton: true,
+                confirmButtonColor: '#D4AF37',
+                cancelButtonText: 'Voltar'
+            }).then((result) => {
+                if (result.value) {
+                    const sel = document.getElementById('marketSelect');
+                    const opt = document.createElement('option');
+                    opt.text = result.value;
+                    opt.selected = true;
+                    sel.add(opt);
+                }
+            });
+        }
+
+        async function fetchAndQuery() {
             Swal.fire({
                 title: 'Selecione o Período',
                 html: '<input type="text" id="rangeDate" class="swal2-input" style="width: 80%">',
                 didOpen: () => {
                     flatpickr("#rangeDate", { mode: "range", dateFormat: "d/m/Y", locale: "pt" });
                 },
-                confirmButtonText: 'Consultar',
-                confirmButtonColor: '#D4AF37',
-                preConfirm: () => { return document.getElementById('rangeDate').value; }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    showMockResults(result.value);
-                }
-            });
-        }
-
-        function showMockResults(periodo) {
-            Swal.fire({
-                title: 'Resultados: ' + periodo,
-                html: `
-                    <div class="stats-grid">
-                        <div class="stat-box"><div class="stat-val">R$ 0,00</div><div class="stat-label">TOTAL LOJA</div></div>
-                        <div class="stat-box"><div class="stat-val">R$ 0,00</div><div class="stat-label">TOTAL CASA</div></div>
-                    </div>
-                    <p style="font-size: 0.8rem; margin-top: 15px;">*Os totais reais serão puxados da API em breve.</p>
-                `,
+                confirmButtonText: 'Calcular Totais',
                 confirmButtonColor: '#D4AF37'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    const range = document.getElementById('rangeDate').value;
+                    if (!range.includes(" até ")) return;
+
+                    Swal.fire({ title: 'Processando Planilha...', didOpen: () => Swal.showLoading() });
+                    
+                    try {
+                        const response = await fetch(GAS_API);
+                        const allData = await response.json();
+                        
+                        let totalLoja = 0, totalCasa = 0;
+                        // Filtro de lógica de data simples aqui
+                        allData.forEach(row => {
+                            if (row.destino === "LOJA") totalLoja += parseFloat(row.valor || 0);
+                            if (row.destino === "CASA") totalCasa += parseFloat(row.valor || 0);
+                        });
+
+                        Swal.fire({
+                            title: 'Resumo do Período',
+                            html: `
+                                <div class="stats-grid">
+                                    <div class="stat-box"><div class="stat-val">R$ ${totalLoja.toFixed(2)}</div><div class="stat-label">TOTAL LOJA</div></div>
+                                    <div class="stat-box"><div class="stat-val">R$ ${totalCasa.toFixed(2)}</div><div class="stat-label">TOTAL CASA</div></div>
+                                </div>
+                            `,
+                            confirmButtonColor: '#D4AF37'
+                        });
+                    } catch (e) {
+                        Swal.fire('Erro', 'Não foi possível ler os dados.', 'error');
+                    }
+                }
             });
         }
 
@@ -242,7 +289,6 @@
                 (decodedText) => {
                     html5QrCode.stop();
                     document.getElementById('reader').style.display = 'none';
-                    Swal.fire('QR Code Lido!', 'Preencha os detalhes do item.', 'success');
                     showForm('Lançamento via QR');
                 }
             );
@@ -265,20 +311,17 @@
                 sessao: "Geral"
             };
 
-            if(!data.nome || !data.valor) return Swal.fire('Erro', 'Nome e Valor são obrigatórios', 'error');
+            if(!data.nome || !data.valor) return Swal.fire('Atenção', 'Preencha o item e o valor.', 'warning');
 
-            Swal.fire({ title: 'Gravando...', didOpen: () => Swal.showLoading() });
+            Swal.fire({ title: 'Salvando...', didOpen: () => Swal.showLoading() });
 
             try {
                 await fetch(GAS_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
-                Swal.fire('Sucesso!', 'Item registrado na planilha.', 'success').then(() => location.reload());
+                Swal.fire('Registrado!', 'Os dados já estão na nuvem.', 'success').then(() => location.reload());
             } catch (e) {
-                Swal.fire('Erro', 'Falha ao conectar com o Google.', 'error');
+                Swal.fire('Erro', 'Falha na conexão.', 'error');
             }
         }
-
-        function openSheet() { window.open(SPREADSHEET_URL, '_blank'); }
-        function cancelAction() { location.reload(); }
     </script>
 </body>
 </html>
