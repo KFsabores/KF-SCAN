@@ -213,7 +213,7 @@
     </div>
 
     <script>
-        const GAS_API = "https://script.google.com/macros/s/AKfycbyG1h9qqJfD_gxVKUQq7xM_LHRaJVPgLTcXGQKxi5FVVRJxn1-JgdVIwyvlOKnbN24L4w/exec";
+        const GAS_API = "https://script.google.com/macros/s/AKfycbyDmjbz1JbhmQ25p20a7kzKePCVZVNkNwjNF8K_GrtUdu6naPbZxugD93c5QSZeho7hvg/exec";
         let html5QrCode;
 
         // Lista padrão de mercados
@@ -351,16 +351,14 @@
             });
 
             try {
-                // Usamos POST com mode no-cors para evitar problemas de pré-venda (preflight)
+                // Simplificamos o envio para garantir compatibilidade máxima com o Google
                 await fetch(GAS_API, { 
                     method: 'POST', 
                     mode: 'no-cors',
                     cache: 'no-cache',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data) 
                 });
                 
-                // Como no-cors não permite ler a resposta, assumimos sucesso se o fetch não der erro de rede
                 Swal.fire({
                     title: 'Sucesso!',
                     text: 'Dados enviados para a planilha.',
