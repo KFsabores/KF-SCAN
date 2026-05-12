@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KF-SCAN | Dashboard</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root { --gold: #D4AF37; --black: #0f0f0f; --card: #1e1e1e; }
+        body { background: var(--black); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
+        
+        .app-container { max-width: 500px; margin: 0 auto; padding: 20px; }
+        
+        .header { text-align: center; padding: 40px 0; }
+        .logo-seal {
+            width: 120px; height: 120px; border: 4px solid var(--gold);
+            border-radius: 50%; margin: 0 auto 15px;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(145deg, #1a1a1a, #000);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5), 0 0 15px rgba(212,175,55,0.2);
+            font-size: 1.2rem; font-weight: 900; color: var(--gold); letter-spacing: 1px;
+        }
+
+        .card {
+            background: var(--card); border-radius: 20px; padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); margin-bottom: 20px;
+            border: 1px solid #333;
+        }
+
+        label { color: var(--gold); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; }
+        
+        select, input {
+            width: 100%; background: #252525; border: 1px solid #444;
+            color: #fff; padding: 15px; border-radius: 12px; margin-bottom: 15px; font-size: 1rem;
+        }
+
+        button {
+            width: 100%; padding: 18px; border-radius: 15px; border: none;
+            font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        .btn-gold { background: linear-gradient(45deg, #D4AF37, #F2D472); color: #000; box-shadow: 0 5px 15px rgba(212,175,55,0.3); }
+        .btn-outline { background: transparent; border: 1px solid var(--gold); color: var(--gold); margin-top: 10px; }
+
+        #reader { width: 100%; border-radius: 15px; overflow: hidden; border: 2px solid var(--gold); display: none; }
+        
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <div class="logo-seal">KF-SCAN</div>
+        <p style="color: #888; font-size: 0.9rem;">Gestão de Suprimentos Premium</p>
+    </div>
+
+    <div id="setup-screen">
+        <div class="card">
+            <label>Mercado</label>
+            <select id="marketSelect">
+                <option>Assaí</option><option>MaM</option><option>MEGA</option>
+                <option>CEASA</option><option>Guanabara</option><option>Sacolão</option>
+            </select>
+            <input type="text" id="newMarket" placeholder="Outro mercado...">
+            <button class="btn-gold" onclick="startScanner()" style="margin-top: 10px;">📸 Escanear QR Code</button>
+            <button class="btn-outline" onclick="showForm('Manual')">✍️ Lançamento Manual</button>
+        </div>
+        <div id="reader"></div>
+    </div>
+
+    <div id="form-screen" class="hidden">
+        <div class="card">
+            <h2 id="formTitle" style="margin-top:0; font-size: 1.2rem; color: var(--gold);">Revisar Item</h2>
+            
+            <label>Item</label>
+            <input type="text" id="editNome">
+            
+            <div style="display: flex; gap: 10px;">
+                <div style="flex: 1;"><label>Qtd</label><input type="number" id="editQtd" value="1"></div>
+                <div style="flex: 2;"><label>Valor R$</label><input type="text" id="editValor"></div>
+            </div>
+
+            <label>Destino</label>
+            <select id="editDestino">
+                <option value="LOJA">LOJA (KF Sabores)</option>
+                <option value="CASA">CASA (Pessoal)</option>
+            </select>
+
+            <button class="btn-gold" onclick="sendData()">✓ Salvar na Planilha</button>
+            <button class="btn-outline" onclick="location.reload()">↺ Voltar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const GAS_URL = "SUA_NOVA_URL_DO_APPS_SCRIPT_AQUI"; // COLOQUE A URL AQUI
+    let scanner;
+
+    function startScanner() {
+        document.getElementById('reader').style.display = 'block';
+        scanner = new Html5Qrcode("reader");
+        scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, 
+            (decodedText) => {
+                scanner.stop();
+                document.getElementById('reader').style.display = 'none';
+                // Para NFC-e, o ideal é tratar a URL, mas aqui vamos simular a abertura
+                Swal.fire('Lido!', 'Chave detectada. Preencha os detalhes.', 'success');
+                showForm('QR Code');
+            }
+        );
+    }
+
+    function showForm(type) {
+        document.getElementById('setup-screen').classList.add('hidden');
+        document.getElementById('form-screen').classList.remove('hidden');
+        document.getElementById('formTitle').innerText = "Lançamento " + type;
+    }
+
+    async function sendData() {
+        const payload = {
+            data: new Date().toLocaleDateString('pt-BR'),
+            nome: document.getElementById('editNome').value,
+            qtd: document.getElementById('editQtd').value,
+            valor: document.getElementById('editValor').value,
+            mercado: document.getElementById('marketSelect').value,
+            destino: document.getElementById('editDestino').value,
+            sessao: "Geral"
+        };
+
+        Swal.fire({ title: 'Salvando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+        try {
+            await fetch(GAS_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Necessário para evitar erros de política do Google
+                body: JSON.stringify(payload)
+            });
+            Swal.fire('Sucesso!', 'Item gravado na KF-SCAN_Dados_Fiscais', 'success').then(() => location.reload());
+        } catch (e) {
+            Swal.fire('Erro', 'Não foi possível salvar.', 'error');
+        }
+    }
+</script>
+</body>
+</html>
